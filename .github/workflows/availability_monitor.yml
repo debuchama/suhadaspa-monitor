@@ -1,0 +1,52 @@
+name: Availability Monitor (30min)
+
+on:
+  schedule:
+    # JST 10:00〜翌5:00 = UTC 01:00〜20:00
+    # 30分毎: 毎時 0分 と 30分
+    - cron: '0,30 1-20 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install httpx beautifulsoup4
+
+      - name: Download DB artifact
+        uses: actions/cache@v4
+        with:
+          path: data/suhadaspa.db
+          key: suhadaspa-db-${{ github.run_number }}
+          restore-keys: |
+            suhadaspa-db-
+
+      - name: Ensure DB exists
+        working-directory: scripts
+        run: python -c "from db_setup import setup; setup()"
+
+      - name: Run monitor
+        working-directory: scripts
+        run: python daily_monitor.py
+
+      - name: Export dashboard data
+        working-directory: scripts
+        run: python export_data.py
+
+      - name: Commit & push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/
+          git diff --staged --quiet || git commit -m "📡 Monitor snapshot $(TZ=Asia/Tokyo date '+%H:%M')"
+          git push

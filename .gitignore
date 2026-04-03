@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+.venv/
+*.egg-info/
+# DBはgitに含める (GitHub Actions間で共有)
+# data/suhadaspa.db は含める

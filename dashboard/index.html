@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>すはだSPA 千葉店 モニター</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0e0e12;--sf:#16161d;--sf2:#1e1e28;--bd:#2a2a38;--tx:#e0e0e8;--mt:#7a7a90;--ac:#e8a0c0;--ac2:#a0c0e8;--hot:#ff6b8a;--warm:#ffb86b;--cool:#6bc5ff;--grn:#6bffa8;--r:10px}
+body{font-family:'Helvetica Neue',sans-serif;background:var(--bg);color:var(--tx);line-height:1.6}
+.hd{background:linear-gradient(135deg,#1a1020,#0e0e12 50%,#0e1520);border-bottom:1px solid var(--bd);padding:16px 0;position:sticky;top:0;z-index:100}
+.hd .in{max-width:1100px;margin:0 auto;padding:0 14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px}
+.hd h1{font-size:1.3rem;font-weight:700;background:linear-gradient(90deg,var(--ac),var(--ac2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hd .meta{font-size:.72rem;color:var(--mt)}
+.tabs{max-width:1100px;margin:0 auto;padding:12px 14px 0;display:flex;gap:3px;flex-wrap:wrap}
+.tb{background:var(--sf);border:1px solid var(--bd);color:var(--mt);padding:7px 14px;border-radius:8px 8px 0 0;cursor:pointer;font-size:.8rem;font-weight:500;transition:.2s}
+.tb:hover{color:var(--tx);background:var(--sf2)}.tb.on{background:var(--sf2);color:var(--ac);border-bottom-color:var(--sf2)}
+.tp{display:none;max-width:1100px;margin:0 auto;padding:0 14px 28px}.tp.on{display:block}
+.mg{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin:14px 0}
+.mc{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:12px;text-align:center}
+.mc .v{font-size:1.6rem;font-weight:700}.mc .l{font-size:.68rem;color:var(--mt);margin-top:2px}
+.st{font-size:.95rem;font-weight:700;margin:16px 0 8px;padding-left:8px;border-left:3px solid var(--ac)}
+.card{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:14px;margin-bottom:10px}
+.tbl{width:100%;border-collapse:collapse;font-size:.75rem}
+.tbl th{background:var(--sf);color:var(--mt);font-weight:500;padding:7px 5px;text-align:left;border-bottom:2px solid var(--bd);position:sticky;top:0}
+.tbl td{padding:6px 5px;border-bottom:1px solid var(--bd)}.tbl tr:hover td{background:var(--sf2)}
+a{color:var(--ac);text-decoration:none}a:hover{text-decoration:underline}
+.b{display:inline-block;padding:2px 7px;border-radius:10px;font-size:.62rem;font-weight:600;margin-right:3px}
+.b-hot{background:rgba(255,107,138,.15);color:var(--hot)}.b-warm{background:rgba(255,184,107,.15);color:var(--warm)}
+.b-cool{background:rgba(107,197,255,.15);color:var(--cool)}.b-grn{background:rgba(107,255,168,.15);color:var(--grn)}
+.gntt{overflow-x:auto;margin:8px 0}.gntt .row{display:flex;align-items:center;margin-bottom:4px;min-height:28px}
+.gntt .nm{width:80px;flex-shrink:0;font-size:.72rem;font-weight:500;text-align:right;padding-right:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gntt .tk{flex:1;position:relative;height:22px;background:var(--sf2);border-radius:3px;min-width:400px}
+.gntt .bar{position:absolute;top:1px;height:20px;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:.58rem;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;transition:.3s}
+.gntt .bar:hover{filter:brightness(1.3);transform:scaleY(1.2);z-index:2}
+.gntt .hrs{display:flex;position:relative;height:14px;margin-left:80px;min-width:400px;margin-bottom:4px}
+.gntt .hrs span{position:absolute;font-size:.55rem;color:var(--mt);transform:translateX(-50%)}
+.ld{text-align:center;padding:40px;color:var(--mt);font-size:.9rem}
+.ina{opacity:.4}
+@media(max-width:600px){.mg{grid-template-columns:repeat(2,1fr)}.gntt .tk,.gntt .hrs{min-width:300px}}
+</style>
+</head>
+<body>
+<div class="hd"><div class="in"><div><h1>すはだSPA 千葉店 モニター</h1><div class="meta" id="genAt">読み込み中...</div></div></div></div>
+<div class="tabs" id="tabs">
+<button class="tb on" data-t="today">📅 Today</button>
+<button class="tb" data-t="weekly">📈 Weekly</button>
+<button class="tb" data-t="stats">👥 Stats</button>
+<button class="tb" data-t="snaps">📡 Snapshots</button>
+</div>
+<div id="tab-today" class="tp on"><div class="ld">データ読み込み中...</div></div>
+<div id="tab-weekly" class="tp"><div class="ld">データ読み込み中...</div></div>
+<div id="tab-stats" class="tp"><div class="ld">データ読み込み中...</div></div>
+<div id="tab-snaps" class="tp"><div class="ld">データ読み込み中...</div></div>
+
+<script>
+const DOW=['日','月','火','水','木','金','土'];
+const COLORS=['#e85d8a','#e8a05d','#5da0e8','#5de8a0','#a05de8','#e8d85d','#5de8d8','#d85de8'];
+function lnk(id,n){return`<a href="https://suhadaspa.vsw.jp/chiba/therapist/${id}" target="_blank">${n}</a>`;}
+function normF(t){if(!t)return null;const m=t.match(/^(\d+):(\d{2})$/);if(!m)return null;return parseInt(m[1])+parseInt(m[2])/60;}
+function dispT(t){if(!t)return'';const m=t.match(/^(\d+):(\d{2})$/);if(!m)return t;let h=parseInt(m[1]);const ov=h>=24;if(ov)h-=24;return(ov?'翌':'')+String(h).padStart(2,'0')+':'+m[2];}
+
+// Tab switching
+document.querySelectorAll('.tb').forEach(b=>{b.onclick=()=>{
+  document.querySelectorAll('.tb').forEach(x=>x.classList.remove('on'));
+  document.querySelectorAll('.tp').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on');document.getElementById('tab-'+b.dataset.t).classList.add('on');
+};});
+
+// Load data
+fetch('https://raw.githubusercontent.com/debuchama/suhadaspa-monitor/main/data/dashboard_data.json')
+.then(r=>{if(!r.ok)return fetch('../data/dashboard_data.json');return r;})
+.then(r=>r.json())
+.then(D=>{renderAll(D);})
+.catch(e=>{
+  // Fallback: try local
+  fetch('../data/dashboard_data.json').then(r=>r.json()).then(D=>renderAll(D))
+  .catch(()=>{document.querySelectorAll('.tp').forEach(el=>{el.innerHTML='<div class="ld">データ読み込みエラー。GitHubリポジトリにデプロイしてください。</div>';});});
+});
+
+function renderAll(D){
+  document.getElementById('genAt').textContent=`更新: ${(D.generated_at||'').replace('T',' ').slice(0,16)} / 在籍${D.therapists?.length||0}名`;
+
+  // ═══ TODAY ═══
+  const todayEl=document.getElementById('tab-today');
+  const ts=D.today_schedule||[];
+  const dayC=ts.length,dayS=ts.filter(t=>normF(t.start_time)<18).length;
+  let html=`<div class="mg">
+    <div class="mc"><div class="v" style="color:var(--ac)">${dayC}</div><div class="l">出勤セラピスト</div></div>
+    <div class="mc"><div class="v" style="color:var(--warm)">${dayS}</div><div class="l">昼帯(～18時)</div></div>
+    <div class="mc"><div class="v" style="color:var(--cool)">${dayC-dayS}</div><div class="l">夜帯(18時～)</div></div>
+  </div>`;
+
+  // Gantt
+  const HS=10,HE=26;
+  html+=`<div class="st">タイムライン</div><div class="card"><div class="gntt"><div class="hrs">`;
+  for(let h=HS;h<=HE;h++){html+=`<span style="left:${((h-HS)/(HE-HS))*100}%">${h>=24?'翌'+(h-24)+':00':h+':00'}</span>`;}
+  html+=`</div>`;
+  const sorted=[...ts].sort((a,b)=>(normF(a.start_time)||0)-(normF(b.start_time)||0));
+  sorted.forEach((t,i)=>{
+    const sv=normF(t.start_time),ev=normF(t.end_time);
+    if(sv===null||ev===null)return;
+    const l=((sv-HS)/(HE-HS))*100,w=((ev-sv)/(HE-HS))*100;
+    html+=`<div class="row"><div class="nm">${t.name}</div><div class="tk"><div class="bar" style="left:${l}%;width:${w}%;background:${COLORS[i%8]}" title="${t.name}: ${dispT(t.start_time)}～${dispT(t.end_time)}">${t.raw_start||''}～${t.raw_end||''}</div></div></div>`;
+  });
+  html+=`</div></div>`;
+
+  // Today list
+  html+=`<div class="st">本日出勤</div>`;
+  sorted.forEach(t=>{
+    const p=D.therapists?.find(x=>x.therapist_id===t.therapist_id)||{};
+    html+=`<div class="card" style="display:flex;gap:10px;align-items:center">
+      <div style="flex:1"><strong>${lnk(t.therapist_id,t.name)}</strong>
+      <span style="font-size:.78rem;color:var(--mt)"> ${dispT(t.start_time)}～${dispT(t.end_time)}</span><br>
+      <span style="font-size:.72rem;color:var(--mt)">Age:${p.age||'-'} / H:${p.height||'-'} / Cup:${p.cup||'-'}</span>
+      ${p.description?`<div style="font-size:.68rem;color:var(--mt);margin-top:3px">${p.description.slice(0,80)}…</div>`:''}</div>
+    </div>`;
+  });
+  if(!ts.length)html+=`<div class="card" style="color:var(--mt)">本日の出勤データなし</div>`;
+  todayEl.innerHTML=html;
+
+  // ═══ WEEKLY ═══
+  const weekEl=document.getElementById('tab-weekly');
+  let whtml='';
+
+  // Daily bar chart
+  whtml+=`<div class="st">日別出勤人数</div><div class="card"><canvas id="dailyChart" height="180"></canvas></div>`;
+
+  // DOW heatmap
+  whtml+=`<div class="st">曜日別出勤パターン</div><div class="card" style="overflow-x:auto"><table class="tbl" id="dowTbl"></table></div>`;
+
+  // Time coverage
+  whtml+=`<div class="st">時間帯カバー率</div><div class="card"><canvas id="timeChart" height="160"></canvas></div>`;
+
+  weekEl.innerHTML=whtml;
+
+  // Draw daily chart
+  const ws=D.week_schedule||{};
+  const wdates=D.week_dates||[];
+  const labels=wdates.map(d=>{const dt=new Date(d);return`${d.slice(5)} (${DOW[dt.getDay()]})`;});
+  const counts=wdates.map(d=>(ws[d]||[]).length);
+  new Chart(document.getElementById('dailyChart'),{type:'bar',data:{labels,datasets:[{
+    label:'出勤人数',data:counts,
+    backgroundColor:wdates.map(d=>{const dow=new Date(d).getDay();return dow===6?'rgba(255,159,67,.6)':dow===0?'rgba(255,107,138,.6)':'rgba(160,192,232,.6)';})
+  }]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#7a7a90'}},y:{ticks:{color:'#7a7a90',precision:0},grid:{color:'#2a2a35'}}}}});
+
+  // DOW table
+  const dowP=D.dow_patterns||[];
+  const dows=['月','火','水','木','金','土','日'];
+  let thtml=`<thead><tr><th>セラピスト</th>${dows.map(d=>`<th>${d}</th>`).join('')}<th>計</th></tr></thead><tbody>`;
+  dowP.sort((a,b)=>{const sa=dows.reduce((s,d)=>s+(a.days[d]||0),0),sb=dows.reduce((s,d)=>s+(b.days[d]||0),0);return sb-sa;});
+  dowP.forEach(p=>{
+    const tot=dows.reduce((s,d)=>s+(p.days[d]||0),0);
+    thtml+=`<tr><td style="text-align:right;font-weight:500;white-space:nowrap">${p.name}</td>${dows.map(d=>{
+      const v=p.days[d]||0;const bg=v===0?'transparent':v===1?'rgba(232,160,192,.15)':v>=2?'rgba(232,160,192,.4)':'';
+      return`<td style="text-align:center;background:${bg};font-weight:${v>=2?700:400}">${v||''}</td>`;
+    }).join('')}<td style="font-weight:700;text-align:center">${tot}</td></tr>`;
+  });
+  thtml+='</tbody>';
+  document.getElementById('dowTbl').innerHTML=thtml;
+
+  // Time chart
+  const tc=D.time_coverage||[];
+  new Chart(document.getElementById('timeChart'),{type:'bar',data:{
+    labels:tc.map(t=>t.hour>=24?`翌${t.hour-24}`:String(t.hour)),
+    datasets:[{label:'シフト数',data:tc.map(t=>t.count),
+      backgroundColor:tc.map(t=>t.hour<18?'rgba(255,184,107,.5)':'rgba(107,197,255,.5)'),
+      borderRadius:3}]
+  },options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#7a7a90'}},y:{ticks:{color:'#7a7a90',precision:0},grid:{color:'#2a2a35'}}}}});
+
+  // ═══ STATS ═══
+  const statsEl=document.getElementById('tab-stats');
+  let shtml='';
+  
+  // Frequency ranking
+  const fr=D.frequency_ranking||[];
+  shtml+=`<div class="st">出勤頻度ランキング (直近30日)</div><div class="card"><canvas id="freqChart" height="200"></canvas></div>`;
+
+  // Full roster
+  shtml+=`<div class="st">全セラピスト一覧</div><div class="card" style="overflow-x:auto"><table class="tbl"><thead><tr><th>#</th><th>名前</th><th>Age</th><th>H</th><th>Cup</th><th>B/W/H</th><th>出勤数</th><th>初確認</th><th>最終確認</th></tr></thead><tbody>`;
+  const roster=[...(D.therapists||[])];
+  const freqMap=Object.fromEntries(fr.map(f=>[f.therapist_id,f.shift_count]));
+  roster.sort((a,b)=>(freqMap[b.therapist_id]||0)-(freqMap[a.therapist_id]||0));
+  roster.forEach((p,i)=>{
+    const cnt=freqMap[p.therapist_id]||0;
+    const bwh=[p.bust,p.waist,p.hip].filter(x=>x&&x!=='-').join('/');
+    shtml+=`<tr class="${cnt===0?'ina':''}"><td>${i+1}</td><td style="font-weight:600;white-space:nowrap">${lnk(p.therapist_id,p.name)}</td><td>${p.age||'-'}</td><td>${p.height||'-'}</td><td><strong>${p.cup||'-'}</strong></td><td style="font-size:.68rem">${bwh||'-'}</td><td style="text-align:center;font-weight:700;color:${cnt>=4?'var(--hot)':cnt>=2?'var(--warm)':cnt>0?'var(--grn)':'var(--mt)'}">${cnt}</td><td style="font-size:.68rem">${(p.first_seen||'').slice(5)}</td><td style="font-size:.68rem">${(p.last_seen||'').slice(5)}</td></tr>`;
+  });
+  shtml+=`</tbody></table></div>`;
+  statsEl.innerHTML=shtml;
+
+  // Freq chart
+  if(fr.length){
+    new Chart(document.getElementById('freqChart'),{type:'bar',data:{
+      labels:fr.map(f=>f.name),
+      datasets:[{label:'シフト数',data:fr.map(f=>f.shift_count),
+        backgroundColor:fr.map(f=>f.shift_count>=4?'rgba(255,107,138,.6)':f.shift_count>=2?'rgba(255,184,107,.6)':'rgba(160,192,232,.6)'),
+        borderRadius:4}]
+    },options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#7a7a90',precision:0},grid:{color:'#2a2a35'}},y:{ticks:{color:'#e0e0e8',font:{size:11}}}}}});
+  }
+
+  // ═══ SNAPSHOTS ═══
+  const snapEl=document.getElementById('tab-snaps');
+  const snaps=D.snapshots||[];
+  let snhtml=`<div class="st">スナップショット履歴 (直近7日)</div>`;
+  if(snaps.length){
+    snhtml+=`<div class="card" style="overflow-x:auto"><table class="tbl"><thead><tr><th>日付</th><th>取得時刻</th><th>出勤中</th><th>合計記録</th></tr></thead><tbody>`;
+    snaps.forEach(s=>{
+      const timeStr=(s.checked_at||'').replace(/^\d{4}-\d{2}-\d{2}\s*/,'').slice(0,5);
+      snhtml+=`<tr><td>${(s.date||'').slice(5)}</td><td>${timeStr}</td><td style="font-weight:700;color:var(--grn)">${s.available}</td><td>${s.total}</td></tr>`;
+    });
+    snhtml+=`</tbody></table></div>`;
+  }else{
+    snhtml+=`<div class="card" style="color:var(--mt)">スナップショットデータはモニタリング開始後に蓄積されます。</div>`;
+  }
+
+  // Newcomers
+  const nc=D.newcomers||[];
+  if(nc.length){
+    snhtml+=`<div class="st">新規検出 (直近7日)</div>`;
+    nc.forEach(n=>{snhtml+=`<div class="card"><span class="b b-cool">🆕 NEW</span> ${lnk(n.therapist_id,n.name)} <span style="font-size:.72rem;color:var(--mt)">(${n.first_seen})</span></div>`;});
+  }
+  snapEl.innerHTML=snhtml;
+}
+</script>
+</body>
+</html>
