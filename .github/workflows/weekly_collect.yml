@@ -2,7 +2,6 @@ name: Weekly Schedule Collect
 
 on:
   schedule:
-    # JST 10:00 = UTC 01:00
     - cron: '0 1 * * *'
   workflow_dispatch:
 
@@ -42,7 +41,8 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git pull --rebase || git rebase --abort
           git add data/
-          git diff --staged --quiet || git commit -m "📅 Daily schedule collect $(TZ=Asia/Tokyo date '+%Y-%m-%d %H:%M')"
-          git push || (git pull --rebase && git push)
+          git diff --staged --quiet && echo "No changes" && exit 0
+          git commit -m "📅 Daily schedule collect $(TZ=Asia/Tokyo date '+%Y-%m-%d %H:%M')"
+          git pull --rebase origin main || true
+          git push || (sleep 5 && git pull --rebase origin main && git push)
